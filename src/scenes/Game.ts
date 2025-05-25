@@ -1,35 +1,70 @@
-import { Scene } from 'phaser';
+import { Tilemaps } from 'phaser';
+import { BaseScene } from './BaseScene';
+import { TILE_SCALE, TILE_SIZE } from '../util/const';
 
-export class Game extends Scene
+export class Game extends BaseScene
 {
     camera: Phaser.Cameras.Scene2D.Camera;
-    background: Phaser.GameObjects.Image;
-    msg_text : Phaser.GameObjects.Text;
+
+    map: Tilemaps.Tilemap;
+    tileset: Tilemaps.Tileset;
+
+    tilemapScale: number = 1.0;
+    xLimit: number = 1000.0;
+    yLimit: number = 1000.0;
+
 
     constructor ()
     {
         super('Game');
     }
 
+    init() 
+    {
+        this.cameras.main.fadeOut(1);
+
+        this.load.on('progress', (progress: number) => 
+        {
+            if(progress >= 1) 
+            {
+                this.cameras.main.fadeIn(300);
+            }
+        });
+    }
+
+    preload() 
+    {
+        this.load.image('forestTiles', 'assets/forest/forest-extruded.png');
+        this.load.tilemapTiledJSON('forest', 'assets/forest/forest.tmj')
+    }
+
     create ()
     {
+        super.create();
+
         this.camera = this.cameras.main;
-        this.camera.setBackgroundColor(0x00ff00);
+        this.camera.setBackgroundColor(0x000000);
 
-        this.background = this.add.image(512, 384, 'background');
-        this.background.setAlpha(0.5);
+        this.configureTilemaps();
+    }
 
-        this.msg_text = this.add.text(512, 384, 'Make something fun!\nand share it with us:\nsupport@phaser.io', {
-            fontFamily: 'Arial Black', fontSize: 38, color: '#ffffff',
-            stroke: '#000000', strokeThickness: 8,
-            align: 'center'
-        });
-        this.msg_text.setOrigin(0.5);
+    private configureTilemaps()
+    {
+        this.map = this.make.tilemap({key: 'forest'});
+        this.tileset = this.map.addTilesetImage('forest', 'forestTiles', 32, 32, 0, 0)!;
 
-        this.input.once('pointerdown', () => {
+        let groundLayer = this.map.createLayer('ground', this.tileset, 0, 0);
 
-            this.scene.start('GameOver');
+        this.tilemapScale = (this.getGameWidth() * TILE_SCALE) / TILE_SIZE;
 
-        });
+        groundLayer?.setScale(this.tilemapScale, this.tilemapScale);
+
+        this.xLimit = this.map.widthInPixels * this.tilemapScale;
+        this.yLimit = this.map.heightInPixels * this.tilemapScale;
+    }
+
+    update()
+    {
+        this.cameras.main.setBounds(0, 0, this.xLimit, this.yLimit);
     }
 }
