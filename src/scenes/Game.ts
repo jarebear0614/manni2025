@@ -58,6 +58,17 @@ class RainFX extends Phaser.Renderer.WebGL.Pipelines.PostFXPipeline {
     }
 }
 
+class BulbConfig
+{
+    id: number = 0;
+    gameObject: GameObjects.Sprite = null!;
+    bulbIndex: number = 0;
+    x: number = 0;
+    y: number = 0;
+    processed: boolean = false;
+    overlapping: boolean = false;
+}
+
 export class Game extends BaseScene
 {
     camera: Phaser.Cameras.Scene2D.Camera;
@@ -72,6 +83,11 @@ export class Game extends BaseScene
     hair: GameObjects.Sprite;
     skirt: GameObjects.Sprite;
 
+    bulbObjects: BulbConfig[] = [];
+
+    moduloBulb: number = 0;
+    processedBulbSector: boolean = false;
+    bulbSectors: boolean[] = [];
     
     playerVelocity: number = 256;
 
@@ -134,6 +150,7 @@ export class Game extends BaseScene
         this.load.tilemapTiledJSON('forest', 'assets/forest/forest.tmj');
 
         this.load.image('transparent', 'assets/transparent.png');
+        this.load.spritesheet('bulbs', 'assets/bulbs.png', { frameWidth: 32, frameHeight: 32 });
 
         this.load.atlasXML('player', 'assets/player_sheet.png', 'assets/player_sheet.xml');
 
@@ -161,6 +178,7 @@ export class Game extends BaseScene
             frameWidth: 80,
             frameHeight: 64
         });
+        
         (this.renderer as Renderer.WebGL.WebGLRenderer).pipelines.addPostPipeline('rainPostFX', RainFX);
         this.cameras.main.setPostPipeline(RainFX);
     }
@@ -175,6 +193,8 @@ export class Game extends BaseScene
         this.configureTilemaps();
         this.configurePlayer();
         this.configureInput();
+
+        this.configureBulbObjects();
     }
 
     private configureTilemaps()
@@ -193,10 +213,8 @@ export class Game extends BaseScene
         let groundLayer = this.map.createLayer('ground', this.tileset, 0, 0)!;
         this.tilemapScale = (this.getGameWidth() * TILE_SCALE) / TILE_SIZE;
         groundLayer?.setScale(this.tilemapScale, this.tilemapScale);        
-
-        //this.player = this.physics.add.sprite(100, 0, 'player', 'p1_stand.png');
         
-        this.player = this.physics.add.sprite(0, 0, 'player_base', 0).setOrigin(0, 0);
+        this.player = this.physics.add.sprite(100, 0, 'player_base', 0).setOrigin(0, 0);
         this.player.body.setSize(32, 64, true);
         this.player.setFlipX(true);
 
@@ -358,6 +376,38 @@ export class Game extends BaseScene
         this.dKey = this.input.keyboard?.addKey(Input.Keyboard.KeyCodes.D);
     }
 
+    private configureBulbObjects() {
+        let transportObjects = this.map.getObjectLayer('bulbs')!.objects;
+        let idx = 0;
+
+        for (const transportTile of transportObjects) {
+            const { id, x, y, width, height, properties } = transportTile;
+
+            let bulbIndex : number | undefined;
+            idx++;
+
+            for (const property of properties) {
+                switch (property.name) {
+                    case 'bulb_index':
+                        bulbIndex = property.value;
+                        break;
+                }
+            }
+
+            if(bulbIndex == -1)
+            {
+                bulbIndex = Math.round(Math.random()*3);
+            }
+
+            let sprite = this.physics.add.sprite(x! * this.tilemapScale, y! * this.tilemapScale, 'transparent').setOrigin(0, 0);
+            sprite.body.setAllowGravity(false);
+            sprite.body.setSize(width, height, false);
+            //Align.scaleToGameWidth(sprite, TILE_SCALE, this);
+
+            this.bulbObjects.push({id: id, gameObject: sprite, bulbIndex: bulbIndex!, x: x! * this.tilemapScale, y: y! * this.tilemapScale, processed: false, overlapping: false});
+        }
+    }
+
     update(_: number)
     {
         this.cameras.main.setBounds(0, 0, this.xLimit, this.yLimit);
@@ -373,6 +423,27 @@ export class Game extends BaseScene
         this.isDownDown = this.isTouchDownDown || this.cursors!.down.isDown || this.sKey!.isDown;
 
         this.standing = this.player.body.blocked.down || this.player.body.touching.down
+
+
+        let currentModulo = Math.floor(this.player.body.x / (TILE_SIZE * this.tilemapScale));
+        console.log('current modulo ', currentModulo, this.moduloBulb);
+        if(currentModulo > this.moduloBulb)
+        {
+                    console.log('here');
+
+            this.moduloBulb = currentModulo;
+            if(!this.bulbSectors[this.moduloBulb])
+            {
+                this.bulbSectors[this.moduloBulb] = true;
+
+                if(Math.random() < 0.20) 
+                {
+                    this.spawnFlower(this.moduloBulb * TILE_SIZE * this.tilemapScale, this.player.body.y + this.player.displayHeight / 2, Math.round(Math.random()*3));
+                }
+            }
+        }
+
+        this.processBulbOverlaps();
 
         let vel: Phaser.Math.Vector2 = new Phaser.Math.Vector2();
 
@@ -466,5 +537,49 @@ export class Game extends BaseScene
         this.hair.setPosition(this.player.body.x - this.player.body.offset.x, this.player.body.y);
         this.corset.setPosition(this.player.body.x - this.player.body.offset.x, this.player.body.y);
         this.skirt.setPosition(this.player.body.x - this.player.body.offset.x, this.player.body.y);
+    }
+
+    private processBulbOverlaps() {
+        let filteredBulbObjects = this.bulbObjects.filter((f) => {
+            if (this.player.body.x >= f.x - f.gameObject.displayWidth * 3 &&
+                this.player.body.x <= f.x + f.gameObject.displayWidth * 3) {
+                return true;
+            }
+        });
+
+        for (let i = 0; i < filteredBulbObjects.length; ++i) {
+            if (!filteredBulbObjects[i].processed) {
+                if (this.physics.overlap(this.player, filteredBulbObjects[i].gameObject)) {
+                    filteredBulbObjects[i].overlapping = true;
+                }
+
+                else {
+                    if (filteredBulbObjects[i].overlapping) {
+                        filteredBulbObjects[i].processed = true;
+                        this.spawnFlower(filteredBulbObjects[i].x, filteredBulbObjects[i].y, filteredBulbObjects[i].bulbIndex);
+                    }
+                }
+            }
+        }
+    }
+
+    private spawnFlower(x: number, y: number, bulbIndex: number)
+    {
+        
+        let flower = this.add.sprite(x, y, 'bulbs', bulbIndex);
+        Align.scaleToGameWidth(flower, TILE_SCALE, this);
+
+        flower.setPosition(flower.x + flower.displayWidth / 2, flower.y + flower.displayHeight / 2);
+        let displayWidth = flower.displayWidth;
+
+        flower.displayWidth = 1;
+        this.tweens.add({
+            targets: flower,
+            displayWidth: { from: 0, to: displayWidth },
+            ease: 'Linear',
+            duration: 400,
+            repeat: 0,
+            yoyo: false
+        });
     }
 }

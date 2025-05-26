@@ -20,8 +20,8 @@
             "scale": 0.8975520833333334,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 479.63790402135436,
-                "y": 319.75860268090287
+                "x": 518.0757848314281,
+                "y": 320.3156734172808
             }
         },
         "C:/Users/Jared Germano/OneDrive/Pictures/MeganProjects/manni2025/public/assets/forest/forest.tmx#forest": {
@@ -54,11 +54,15 @@
                 "x": 479.63790402135436,
                 "y": 319.75860268090287
             }
+        },
+        "test.tmx#bulbs": {
+            "scaleInDock": 1
         }
     },
     "last.exportedFilePath": "C:/Users/Jared Germano/OneDrive/Pictures/MeganProjects/manni2025/public/assets/forest",
     "last.externalTilesetPath": "C:/Users/Jared Germano/OneDrive/Pictures/MeganProjects/manni2025/public/assets/forest",
-    "last.imagePath": "C:/Users/Jared Germano/OneDrive/Pictures/MeganProjects/manni2025/public/assets/character",
+    "last.imagePath": "C:/Users/Jared Germano/OneDrive/Pictures/MeganProjects/manni2025/public/assets",
+    "last.objectTemplatePath": "C:/Users/Jared Germano/OneDrive/Pictures/MeganProjects/manni2025/tiled",
     "lastUsedTilesetExportFilter": "Tiled tileset files (*.tsx *.xml)",
     "map.lastUsedExportFilter": "JSON map files (*.tmj *.json)",
     "map.lastUsedFormat": "tmx",
@@ -69,22 +73,23 @@
         "test.tmx"
     ],
     "project": "anni2025.tiled-project",
+    "property.type": "int",
     "recentFiles": [
+        "test.tmx",
         "C:/Users/Jared Germano/OneDrive/Pictures/MeganProjects/manni2025/public/assets/forest/forest.tsx",
         "C:/Users/Jared Germano/OneDrive/Pictures/MeganProjects/manni2025/public/assets/forest/forest.tmx",
-        "test.tmx",
         "base.tsx",
         "C:/Users/Jared Germano/OneDrive/Pictures/MeganProjects/manni2025/public/assets/forest/base.tsx",
         "mapanni2025.tmx",
         "forest.tsx"
     ],
-    "tileset.embedInMap": false,
+    "tileset.embedInMap": true,
     "tileset.lastUsedFilter": "Tiled tileset files (*.tsx *.xml)",
     "tileset.lastUsedFormat": "tsx",
-    "tileset.margin": 5,
+    "tileset.margin": 0,
     "tileset.spacing": 0,
     "tileset.tileSize": {
-        "height": 64,
-        "width": 63
+        "height": 32,
+        "width": 32
     }
 }
