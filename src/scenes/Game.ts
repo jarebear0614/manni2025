@@ -1,7 +1,9 @@
-import { Tilemaps, Renderer, Types } from 'phaser';
+import { Tilemaps, Renderer, Input, Types, GameObjects } from 'phaser';
 import { BaseScene } from './BaseScene';
 import { TILE_SCALE, TILE_SIZE } from '../util/const';
 import { Align } from '../util/align';
+
+
 
 const rainFragShader = `
         #define DROP_WITH 0.008
@@ -66,6 +68,11 @@ export class Game extends BaseScene
     cursors: Phaser.Types.Input.Keyboard.CursorKeys | undefined;
 
     player: Types.Physics.Arcade.SpriteWithDynamicBody;
+    corset: GameObjects.Sprite;
+    hair: GameObjects.Sprite;
+    skirt: GameObjects.Sprite;
+
+    
     playerVelocity: number = 256;
 
     isTouchUpDown: boolean = false;
@@ -83,7 +90,16 @@ export class Game extends BaseScene
     isPreviousRightDown: boolean = false;
     isPreviousDownDown: boolean = false;
 
+    wKey: Input.Keyboard.Key | undefined;
+    aKey: Input.Keyboard.Key | undefined;
+    sKey: Input.Keyboard.Key | undefined;
+    dKey: Input.Keyboard.Key | undefined;
+
     facingRight: boolean = true;
+    standing: boolean = true;
+
+    jumping: boolean = false;
+    jumpVelocity = -250;
 
     interactKey: Phaser.Input.Keyboard.Key | undefined;
 
@@ -117,11 +133,34 @@ export class Game extends BaseScene
         this.load.image('forestTiles', 'assets/forest/forest-extruded.png');
         this.load.tilemapTiledJSON('forest', 'assets/forest/forest.tmj');
 
-        this.load.spritesheet('characters', 'assets/characters.png', {frameWidth: 16, frameHeight: 16, spacing: 1});
         this.load.image('transparent', 'assets/transparent.png');
 
         this.load.atlasXML('player', 'assets/player_sheet.png', 'assets/player_sheet.xml');
 
+        //character
+        this.load.spritesheet('player_base', 'assets/character/base.png', 
+        {
+            frameWidth: 80,
+            frameHeight: 64
+        });
+
+        this.load.spritesheet('player_corset', 'assets/character/corset.png', 
+        {
+            frameWidth: 80,
+            frameHeight: 64
+        });
+
+        this.load.spritesheet('player_hair', 'assets/character/hair.png', 
+        {
+            frameWidth: 80,
+            frameHeight: 64
+        });
+
+        this.load.spritesheet('player_skirt', 'assets/character/skirt.png', 
+        {
+            frameWidth: 80,
+            frameHeight: 64
+        });
         (this.renderer as Renderer.WebGL.WebGLRenderer).pipelines.addPostPipeline('rainPostFX', RainFX);
         this.cameras.main.setPostPipeline(RainFX);
     }
@@ -135,6 +174,7 @@ export class Game extends BaseScene
 
         this.configureTilemaps();
         this.configurePlayer();
+        this.configureInput();
     }
 
     private configureTilemaps()
@@ -154,24 +194,168 @@ export class Game extends BaseScene
         this.tilemapScale = (this.getGameWidth() * TILE_SCALE) / TILE_SIZE;
         groundLayer?.setScale(this.tilemapScale, this.tilemapScale);        
 
-        this.player = this.physics.add.sprite(100, 0, 'player', 'p1_stand.png');
+        //this.player = this.physics.add.sprite(100, 0, 'player', 'p1_stand.png');
+        
+        this.player = this.physics.add.sprite(0, 0, 'player_base', 0).setOrigin(0, 0);
+        this.player.body.setSize(32, 64, true);
+        this.player.setFlipX(true);
 
-        Align.scaleToGameWidth(this.player, 0.05, this);
+        this.corset = this.add.sprite(0, 0, 'player_corset', 0).setOrigin(0, 0);        
+        this.corset.setFlipX(true);
+
+        this.hair = this.add.sprite(0, 0, 'player_hair', 0).setOrigin(0, 0);
+        this.hair.setFlipX(true);
+
+        this.skirt = this.add.sprite(0, 0, 'player_skirt', 0).setOrigin(0, 0);
+        this.skirt.setFlipX(true);
+
+        Align.scaleToGameWidth(this.player, 0.08, this);
+        Align.scaleToGameWidth(this.corset, 0.08, this);
+        Align.scaleToGameWidth(this.hair, 0.08, this);
+        Align.scaleToGameWidth(this.skirt, 0.08, this);
 
         this.anims.create({
-            key: 'player_walk',
-            frames: this.anims.generateFrameNames('player', {
-                prefix: 'p1_walk',
-                suffix: '.png',
-                start: 1,
-                end: 11
-            }),
-            frameRate: 5,
+            key: 'base_walk',
+            frames: this.anims.generateFrameNumbers('player_base', {
+                    start: 10,
+                    end: 17
+                }
+            ),
+            frameRate: 15,
             repeat: -1
+        });
+
+        this.anims.create({
+            key: 'base_jump',
+            frames: this.anims.generateFrameNumbers('player_base', {
+                    start: 30,
+                    end: 33
+                }
+            ),
+            frameRate: 15,
+            repeat: 0
+        });
+
+        this.anims.create({
+            key: 'base_idle',
+            frames: this.anims.generateFrameNumbers('player_base', {
+                    start: 0,
+                    end: 5
+                }
+            ),
+            frameRate: 15,
+            repeat: 0
+        });
+
+        this.anims.create({
+            key: 'corset_walk',
+            frames: this.anims.generateFrameNumbers('player_corset', {
+                    start: 10,
+                    end: 17
+                }
+            ),
+            frameRate: 15,
+            repeat: -1
+        });
+
+        this.anims.create({
+            key: 'corset_jump',
+            frames: this.anims.generateFrameNumbers('player_corset', {
+                    start: 30,
+                    end: 33
+                }
+            ),
+            frameRate: 15,
+            repeat: 0
+        });
+
+        this.anims.create({
+            key: 'corset_idle',
+            frames: this.anims.generateFrameNumbers('player_corset', {
+                    start: 0,
+                    end: 5
+                }
+            ),
+            frameRate: 15,
+            repeat: 0
+        });
+
+        this.anims.create({
+            key: 'hair_walk',
+            frames: this.anims.generateFrameNumbers('player_hair', {
+                    start: 10,
+                    end: 17
+                }
+            ),
+            frameRate: 15,
+            repeat: -1
+        });
+
+        this.anims.create({
+            key: 'hair_jump',
+            frames: this.anims.generateFrameNumbers('player_hair', {
+                    start: 30,
+                    end: 33
+                }
+            ),
+            frameRate: 15,
+            repeat: 0
+        });
+
+        this.anims.create({
+            key: 'hair_idle',
+            frames: this.anims.generateFrameNumbers('player_hair', {
+                    start: 0,
+                    end: 5
+                }
+            ),
+            frameRate: 15,
+            repeat: 0
+        });
+
+        this.anims.create({
+            key: 'skirt_walk',
+            frames: this.anims.generateFrameNumbers('player_skirt', {
+                    start: 10,
+                    end: 17
+                }
+            ),
+            frameRate: 15,
+            repeat: -1
+        });
+
+        this.anims.create({
+            key: 'skirt_jump',
+            frames: this.anims.generateFrameNumbers('player_skirt', {
+                    start: 30,
+                    end: 33
+                }
+            ),
+            frameRate: 15,
+            repeat: 0
+        });
+
+        this.anims.create({
+            key: 'skirt_idle',
+            frames: this.anims.generateFrameNumbers('player_skirt', {
+                    start: 0,
+                    end: 5
+                }
+            ),
+            frameRate: 15,
+            repeat: 0
         });
 
         this.physics.add.collider(this.player, groundLayer);
         groundLayer.setCollisionByExclusion([-1], true);
+    }
+
+    private configureInput() 
+    {
+        this.wKey = this.input.keyboard?.addKey(Input.Keyboard.KeyCodes.W);
+        this.aKey = this.input.keyboard?.addKey(Input.Keyboard.KeyCodes.A);
+        this.sKey = this.input.keyboard?.addKey(Input.Keyboard.KeyCodes.S);
+        this.dKey = this.input.keyboard?.addKey(Input.Keyboard.KeyCodes.D);
     }
 
     update(_: number)
@@ -183,16 +367,39 @@ export class Game extends BaseScene
         this.isPreviousRightDown = this.isRightDown;
         this.isPreviousDownDown = this.isDownDown;
 
-        this.isUpDown = this.isTouchUpDown || this.cursors!.up.isDown;
-        this.isLeftDown = this.isTouchLeftDown || this.cursors!.left.isDown;
-        this.isRightDown = this.isTouchRightDown || this.cursors!.right.isDown;
-        this.isDownDown = this.isTouchDownDown || this.cursors!.down.isDown;
+        this.isUpDown = this.isTouchUpDown || this.cursors!.up.isDown || this.wKey!.isDown;
+        this.isLeftDown = this.isTouchLeftDown || this.cursors!.left.isDown || this.aKey!.isDown;
+        this.isRightDown = this.isTouchRightDown || this.cursors!.right.isDown || this.dKey!.isDown;
+        this.isDownDown = this.isTouchDownDown || this.cursors!.down.isDown || this.sKey!.isDown;
+
+        this.standing = this.player.body.blocked.down || this.player.body.touching.down
 
         let vel: Phaser.Math.Vector2 = new Phaser.Math.Vector2();
 
-        if (this.isUpDown && this.player.body.onFloor()) 
+        if (this.isUpDown && !this.jumping && this.standing) 
         {
-            vel.y = -this.playerVelocity;
+            this.player.body.setVelocityY(this.jumpVelocity);
+            this.jumping = true;            
+
+            if(this.player.anims.isPlaying)
+            {
+                this.player.anims.stop();
+                this.corset.anims.stop();
+                this.hair.anims.stop();
+                this.skirt.anims.stop();
+            }
+
+            this.player.anims.play('base_jump');
+            this.corset.anims.play('corset_jump');
+            this.hair.anims.play('hair_jump');
+            this.skirt.anims.play('skirt_jump');
+        } 
+        else if(!this.isUpDown)
+        {
+            if(this.standing)
+            {
+                this.jumping = false;
+            }
         }
 
         if (this.isRightDown) 
@@ -200,7 +407,10 @@ export class Game extends BaseScene
             vel.x = this.playerVelocity;
             if(!this.facingRight)
             {
-                this.player.setFlipX(false);
+                this.player.setFlipX(true);
+                this.corset.setFlipX(true);
+                this.hair.setFlipX(true);
+                this.skirt.setFlipX(true);
                 this.facingRight = true;
             }
         }
@@ -209,28 +419,52 @@ export class Game extends BaseScene
             vel.x = -this.playerVelocity;            
             if(this.facingRight)
             {
-                this.player.setFlipX(true);
+                this.player.setFlipX(false);
+                this.corset.setFlipX(false);
+                this.hair.setFlipX(false);
+                this.skirt.setFlipX(false);
                 this.facingRight = false;
             }
         }
 
         vel = vel.normalize().scale(this.playerVelocity);
-        if(vel.lengthSq() > 0) {
-            this.player.setVelocity(vel.x, vel.y);    
-            console.log('play animation');
-            this.player.anims.play('player_walk', true);
-        } else {
-            console.log('stand');
-            this.player.anims.stop();
-            this.player.setFrame('p1_stand.png');
+        if(Math.abs(vel.x) > 0) 
+        {
+            this.player.setVelocityX(vel.x);   
+            if(!this.jumping)
+            {
+                this.player.anims.play('base_walk', true);
+                this.corset.anims.play('corset_walk', true);
+                this.hair.anims.play('hair_walk', true);
+                this.skirt.anims.play('skirt_walk', true);
+            }
+        } else 
+        {
+            if(!this.jumping)
+            {
+                this.player.anims.stop();                
+                this.corset.anims.stop();
+                this.hair.anims.stop();
+                this.skirt.anims.stop();
+
+                this.player.anims.play('base_idle');
+                this.corset.anims.play('corset_idle');
+                this.hair.anims.play('hair_idle');
+                this.skirt.anims.play('skirt_idle');
+            }
         }
 
         if( (!this.isLeftDown && this.isPreviousLeftDown) ||
-            (!this.isRightDown && this.isPreviousRightDown)) {
-                this.player.setVelocity(0, this.player.body.velocity.y);
+            (!this.isRightDown && this.isPreviousRightDown)) 
+        {
+            this.player.setVelocityX(0);
         }
 
         this.cameras.main.centerOn(this.player.x, this.player.y);      
         this.cameras.main.setBounds(0, 0, this.xLimit, this.yLimit);
+        
+        this.hair.setPosition(this.player.body.x - this.player.body.offset.x, this.player.body.y);
+        this.corset.setPosition(this.player.body.x - this.player.body.offset.x, this.player.body.y);
+        this.skirt.setPosition(this.player.body.x - this.player.body.offset.x, this.player.body.y);
     }
 }
