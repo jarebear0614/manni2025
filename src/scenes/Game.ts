@@ -83,6 +83,7 @@ export class Game extends BaseScene
 
     map: Tilemaps.Tilemap;
     tileset: Tilemaps.Tileset;
+    bulbTileset: Tilemaps.Tileset;
 
     cursors: Phaser.Types.Input.Keyboard.CursorKeys | undefined;
 
@@ -93,7 +94,7 @@ export class Game extends BaseScene
 
     bulbObjects: BulbConfig[] = [];
     bulbRandom: number[] = [1, 2, 3];
-    bulbSpawnChance = 0.20;
+    bulbSpawnChance = 0.0;
 
     moduloBulb: number = 0;
     processedBulbSector: boolean = false;
@@ -143,35 +144,17 @@ export class Game extends BaseScene
     bg4: GameObjects.TileSprite;
     bg5: GameObjects.TileSprite;
 
+    bg1nightfall: GameObjects.TileSprite;
+    bg2nightfall: GameObjects.TileSprite;
+    bg3nightfall: GameObjects.TileSprite;
+    bg4nightfall: GameObjects.TileSprite;
+    bg5nightfall: GameObjects.TileSprite;
+
     currentText: GameObjects.Text;
 
-    poem: PoemLine[] = [
-        {
-            text: 'The earth rises to your smile',
-            xTrigger: 300,
-            flowerSpawnChance: 0.20,
-            processed: false
-        },
-        {
-            text: 'Leaving kindness and love',
-            xTrigger: 1300,
-            flowerSpawnChance: 0.40,
-            processed: false
-        },
-        {
-            text: 'And in a garden of white',
-            xTrigger: 2300,
-            flowerSpawnChance: 0.0,
-            processed: false
-        },
-        {
-            text: 'You bring color and light',
-            xTrigger: 3300,
-            flowerSpawnChance: 0.0,
-            processed: false
-        }
-    ];
-
+    poem: PoemLine[] = [];
+    lastLineReached: boolean = false;
+    
     constructor ()
     {
         super('Game');
@@ -207,6 +190,12 @@ export class Game extends BaseScene
         this.load.image('bg4', 'assets/night/Layer 4.png');
         this.load.image('bg5', 'assets/night/Layer 5.png');
 
+        this.load.image('bg1nightfall', 'assets/nightfall/Layer 1.png');
+        this.load.image('bg2nightfall', 'assets/nightfall/Layer 2.png');
+        this.load.image('bg3nightfall', 'assets/nightfall/Layer 3.png');
+        this.load.image('bg4nightfall', 'assets/nightfall/Layer 4.png');
+        this.load.image('bg5nightfall', 'assets/nightfall/Layer 5.png');
+
         //character
         this.load.spritesheet('player_base', 'assets/character/base.png', { frameWidth: 80, frameHeight: 64 });
         this.load.spritesheet('player_corset', 'assets/character/corset.png', { frameWidth: 80, frameHeight: 64 });
@@ -230,7 +219,8 @@ export class Game extends BaseScene
         this.configurePlayer();
         this.configureInput();
 
-        this.configureBulbObjects();     
+        this.configureBulbObjects();  
+        this.configurePoemLines();   
         
         this.currentText = this.add.text(0, 0, 'test', {fontFamily: 'Arial', fontSize: 48, color: '#ffffff'})
             .setStroke("#000000", 4)
@@ -250,12 +240,24 @@ export class Game extends BaseScene
         this.bg3.setScale(this.getGameWidth() / this.bg3.displayWidth, this.getGameHeight() / this.bg3.displayHeight);
         this.bg4.setScale(this.getGameWidth() / this.bg4.displayWidth, this.getGameHeight() / this.bg4.displayHeight);
         this.bg5.setScale(this.getGameWidth() / this.bg5.displayWidth, this.getGameHeight() / this.bg5.displayHeight);
+
+        this.bg1nightfall = this.add.tileSprite(0, -191, 0, 0, 'bg1nightfall').setOrigin(0, 0).setScrollFactor(0, 0).setAlpha(0);
+        this.bg2nightfall = this.add.tileSprite(0, 0, 0, 0, 'bg2nightfall').setOrigin(0, 0).setScrollFactor(0, 0).setAlpha(0);
+        this.bg3nightfall = this.add.tileSprite(0, 0, 0, 0, 'bg3nightfall').setOrigin(0, 0).setScrollFactor(0, 0).setAlpha(0);
+        this.bg4nightfall = this.add.tileSprite(0, 0, 0, 0, 'bg4nightfall').setOrigin(0, 0).setScrollFactor(0, 0).setAlpha(0);
+        this.bg5nightfall = this.add.tileSprite(0, 0, 0, 0, 'bg5nightfall').setOrigin(0, 0).setScrollFactor(0, 0).setAlpha(0);
+        this.bg1nightfall.setScale(this.getGameWidth() / this.bg1nightfall.displayWidth, this.getGameHeight() / this.bg1nightfall.displayHeight);
+        this.bg2nightfall.setScale(this.getGameWidth() / this.bg2nightfall.displayWidth, this.getGameHeight() / this.bg2nightfall.displayHeight);
+        this.bg3nightfall.setScale(this.getGameWidth() / this.bg3nightfall.displayWidth, this.getGameHeight() / this.bg3nightfall.displayHeight);
+        this.bg4nightfall.setScale(this.getGameWidth() / this.bg4nightfall.displayWidth, this.getGameHeight() / this.bg4nightfall.displayHeight);
+        this.bg5nightfall.setScale(this.getGameWidth() / this.bg5nightfall.displayWidth, this.getGameHeight() / this.bg5nightfall.displayHeight);
     }
 
     private configureTilemaps()
     {
         this.map = this.make.tilemap({key: 'forest'});
         this.tileset = this.map.addTilesetImage('forest', 'forestTiles', 32, 32, 0, 0)!;
+        this.bulbTileset = this.map.addTilesetImage('bulbs', 'bulbs', 32, 32, 0, 0)!;
 
         this.xLimit = this.map.widthInPixels * this.tilemapScale;
         this.yLimit = this.map.heightInPixels * this.tilemapScale;
@@ -272,6 +274,10 @@ export class Game extends BaseScene
 
         this.tilemapOffset = this.getGameHeight() - groundLayer.displayHeight;
         groundLayer.setPosition(0, this.tilemapOffset);
+
+        let decorationLayer = this.map.createLayer('decoration', this.bulbTileset, 0, 0)!.setOrigin(0, 0);
+        decorationLayer.setScale(this.tilemapScale, this.tilemapScale);
+        decorationLayer.setPosition(0, this.tilemapOffset);
         
         this.player = this.physics.add.sprite(100, 0, 'player_base', 0).setOrigin(0, 0);
         this.player.body.setSize(32, 64, true);
@@ -457,7 +463,6 @@ export class Game extends BaseScene
             {
                 let idx = Math.round(Math.random()*(this.bulbRandom.length - 1));
                 bulbIndex = this.bulbRandom[idx];
-                console.log('bulbIndex', idx, bulbIndex);
             }
 
             let sprite = this.physics.add.sprite(x! * this.tilemapScale, y! * this.tilemapScale + this.tilemapOffset, 'transparent').setOrigin(0, 0);
@@ -466,6 +471,35 @@ export class Game extends BaseScene
             //Align.scaleToGameWidth(sprite, TILE_SCALE, this);
 
             this.bulbObjects.push({id: id, gameObject: sprite, bulbIndex: bulbIndex!, x: x! * this.tilemapScale, y: y! * this.tilemapScale, processed: false, overlapping: false});
+        }
+    }
+
+    private configurePoemLines() {
+        let transportObjects = this.map.getObjectLayer('poem')!.objects;
+
+        for (const transportTile of transportObjects) {
+            const { x, properties } = transportTile;
+
+            let text : string | undefined;
+            let bulbSpawnChance: number | undefined = 0.20;
+
+            for (const property of properties) {
+                switch (property.name) {
+                    case 'text':
+                        text = property.value;
+                        break;
+                    case 'bulbSpawnChance':
+                        bulbSpawnChance = parseFloat(property.value);
+                        break;
+                }
+            }
+
+            this.poem.push({
+                text: text!,
+                flowerSpawnChance: bulbSpawnChance,
+                xTrigger: x! * this.tilemapScale,
+                processed: false
+            });
         }
     }
 
@@ -603,6 +637,11 @@ export class Game extends BaseScene
         this.bg4.tilePositionX += (this.camera.scrollX - this.lastCameraX) * 0.30;
         this.bg5.tilePositionX += (this.camera.scrollX - this.lastCameraX) * 0.40;
 
+        this.bg2nightfall.tilePositionX += (this.camera.scrollX - this.lastCameraX) * 0.10;
+        this.bg3nightfall.tilePositionX += (this.camera.scrollX - this.lastCameraX) * 0.20;
+        this.bg4nightfall.tilePositionX += (this.camera.scrollX - this.lastCameraX) * 0.30;
+        this.bg5nightfall.tilePositionX += (this.camera.scrollX - this.lastCameraX) * 0.40;
+
         for(let i = 0; i < this.poem.length; ++i)
         {
             let line = this.poem[i];
@@ -628,13 +667,12 @@ export class Game extends BaseScene
 
                 fadeOutTween.onCompleteHandler = () => 
                 {
-                    console.log('here');
                     this.currentText.text = line.text;
                     this.currentText.alpha = 0;
 
                     this.currentText.setPosition(this.getGameWidth() / 2 - this.currentText.displayWidth / 2, this.getGameHeight() * 0.35);
                     
-                    this.tweens.killAll();
+                    this.tweens.killTweensOf(this.currentText);
 
                     this.tweens.add({
                         targets: this.currentText,
@@ -646,6 +684,58 @@ export class Game extends BaseScene
                     })
                 };
             }
+        }
+
+        if(!this.lastLineReached && this.poem.filter((f) => { return !f.processed; }).length == 0)
+        {
+            this.lastLineReached = true;
+
+            this.cameras.main.resetPostPipeline(true);            
+
+            this.tweens.add({
+                targets: this.bg1nightfall,
+                alpha: { from: 0, to: 1 },
+                ease: 'Linear',
+                duration: 1000,
+                repeat: 0,
+                yoyo: false
+            });
+
+            this.tweens.add({
+                targets: this.bg2nightfall,
+                alpha: { from: 0, to: 1 },
+                ease: 'Linear',
+                duration: 1000,
+                repeat: 0,
+                yoyo: false
+            });
+
+            this.tweens.add({
+                targets: this.bg3nightfall,
+                alpha: { from: 0, to: 1 },
+                ease: 'Linear',
+                duration: 1000,
+                repeat: 0,
+                yoyo: false
+            });
+
+            this.tweens.add({
+                targets: this.bg4nightfall,
+                alpha: { from: 0, to: 1 },
+                ease: 'Linear',
+                duration: 1000,
+                repeat: 0,
+                yoyo: false
+            });
+
+            this.tweens.add({
+                targets: this.bg5nightfall,
+                alpha: { from: 0, to: 1 },
+                ease: 'Linear',
+                duration: 1000,
+                repeat: 0,
+                yoyo: false
+            });
         }
 
         this.lastCameraX = this.camera.scrollX;
