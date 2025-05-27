@@ -3,7 +3,7 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "test.tmx",
+    "activeFile": "C:/Users/Jared Germano/OneDrive/Pictures/MeganProjects/manni2025/public/assets/forest/forest.tmx",
     "expandedProjectPaths": [
         "."
     ],
@@ -17,12 +17,15 @@
             "scaleInEditor": 1
         },
         "C:/Users/Jared Germano/OneDrive/Pictures/MeganProjects/manni2025/public/assets/forest/forest.tmx": {
-            "scale": 0.8975520833333334,
-            "selectedLayer": 0,
+            "scale": 2,
+            "selectedLayer": 1,
             "viewCenter": {
-                "x": 518.0757848314281,
-                "y": 320.3156734172808
+                "x": 632.25,
+                "y": 539
             }
+        },
+        "C:/Users/Jared Germano/OneDrive/Pictures/MeganProjects/manni2025/public/assets/forest/forest.tmx#bulbs": {
+            "scaleInDock": 1
         },
         "C:/Users/Jared Germano/OneDrive/Pictures/MeganProjects/manni2025/public/assets/forest/forest.tmx#forest": {
             "scaleInDock": 1
@@ -69,15 +72,14 @@
     "map.renderOrder": "2",
     "openFiles": [
         "C:/Users/Jared Germano/OneDrive/Pictures/MeganProjects/manni2025/public/assets/forest/forest.tsx",
-        "C:/Users/Jared Germano/OneDrive/Pictures/MeganProjects/manni2025/public/assets/forest/forest.tmx",
-        "test.tmx"
+        "C:/Users/Jared Germano/OneDrive/Pictures/MeganProjects/manni2025/public/assets/forest/forest.tmx"
     ],
     "project": "anni2025.tiled-project",
     "property.type": "int",
     "recentFiles": [
-        "test.tmx",
         "C:/Users/Jared Germano/OneDrive/Pictures/MeganProjects/manni2025/public/assets/forest/forest.tsx",
         "C:/Users/Jared Germano/OneDrive/Pictures/MeganProjects/manni2025/public/assets/forest/forest.tmx",
+        "test.tmx",
         "base.tsx",
         "C:/Users/Jared Germano/OneDrive/Pictures/MeganProjects/manni2025/public/assets/forest/base.tsx",
         "mapanni2025.tmx",
