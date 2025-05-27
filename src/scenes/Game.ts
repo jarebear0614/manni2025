@@ -154,6 +154,8 @@ export class Game extends BaseScene
 
     poem: PoemLine[] = [];
     lastLineReached: boolean = false;
+
+    rightButton: GameObjects.Image;
     
     constructor ()
     {
@@ -197,10 +199,12 @@ export class Game extends BaseScene
         this.load.image('bg5nightfall', 'assets/nightfall/Layer 5.png');
 
         //character
-        this.load.spritesheet('player_base', 'assets/character/base.png', { frameWidth: 80, frameHeight: 64 });
-        this.load.spritesheet('player_corset', 'assets/character/corset.png', { frameWidth: 80, frameHeight: 64 });
-        this.load.spritesheet('player_hair', 'assets/character/hair.png', { frameWidth: 80, frameHeight: 64 });
-        this.load.spritesheet('player_skirt', 'assets/character/skirt.png', { frameWidth: 80, frameHeight: 64 });
+        this.load.spritesheet('player_base', 'assets/character/base.png', { frameWidth: 80, frameHeight: 65 });
+        this.load.spritesheet('player_corset', 'assets/character/corset.png', { frameWidth: 80, frameHeight: 65 });
+        this.load.spritesheet('player_hair', 'assets/character/hair.png', { frameWidth: 80, frameHeight: 65 });
+        this.load.spritesheet('player_skirt', 'assets/character/skirt.png', { frameWidth: 80, frameHeight: 65 });
+
+        this.load.image('rightcontrol', 'assets/rightcontrol.png');
         
         (this.renderer as Renderer.WebGL.WebGLRenderer).pipelines.addPostPipeline('rainPostFX', RainFX);
         this.cameras.main.setPostPipeline(RainFX);
@@ -226,6 +230,20 @@ export class Game extends BaseScene
             .setStroke("#000000", 4)
             .setScrollFactor(0)
             .setAlpha(0.0);
+
+        this.rightButton = this.add.image(this.getGameWidth() * 0.15, this.getGameHeight() * 0.94, 'rightcontrol').setInteractive({useHandCursor: true}).setScrollFactor(0);
+
+        Align.scaleToGameWidth(this.rightButton, 0.06, this);
+
+        this.rightButton.on('pointerdown', () => 
+        {
+            this.isTouchRightDown = true;
+        });
+
+        this.rightButton.on('pointerup', () => 
+        {
+            this.isTouchRightDown = false;
+        });
     }
 
     private configureBackgrounds()

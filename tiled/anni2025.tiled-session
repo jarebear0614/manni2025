@@ -16,6 +16,10 @@
             "scaleInDock": 1,
             "scaleInEditor": 1
         },
+        "C:/Users/Jared Germano/OneDrive/Pictures/MeganProjects/manni2025/public/assets/forest/character.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 5.5
+        },
         "C:/Users/Jared Germano/OneDrive/Pictures/MeganProjects/manni2025/public/assets/forest/forest.tmx": {
             "scale": 2,
             "selectedLayer": 1,
@@ -64,7 +68,7 @@
     },
     "last.exportedFilePath": "C:/Users/Jared Germano/OneDrive/Pictures/MeganProjects/manni2025/public/assets/forest",
     "last.externalTilesetPath": "C:/Users/Jared Germano/OneDrive/Pictures/MeganProjects/manni2025/public/assets/forest",
-    "last.imagePath": "C:/Users/Jared Germano/OneDrive/Pictures/MeganProjects/manni2025/public/assets",
+    "last.imagePath": "C:/Users/Jared Germano/OneDrive/Pictures/MeganProjects/manni2025/public/assets/character",
     "last.objectTemplatePath": "C:/Users/Jared Germano/OneDrive/Pictures/MeganProjects/manni2025/tiled",
     "lastUsedTilesetExportFilter": "Tiled tileset files (*.tsx *.xml)",
     "map.lastUsedExportFilter": "JSON map files (*.tmj *.json)",
@@ -77,6 +81,7 @@
     "project": "anni2025.tiled-project",
     "property.type": "float",
     "recentFiles": [
+        "C:/Users/Jared Germano/OneDrive/Pictures/MeganProjects/manni2025/public/assets/forest/character.tsx",
         "C:/Users/Jared Germano/OneDrive/Pictures/MeganProjects/manni2025/public/assets/forest/forest.tsx",
         "C:/Users/Jared Germano/OneDrive/Pictures/MeganProjects/manni2025/public/assets/forest/forest.tmx",
         "test.tmx",
@@ -85,13 +90,13 @@
         "mapanni2025.tmx",
         "forest.tsx"
     ],
-    "tileset.embedInMap": true,
+    "tileset.embedInMap": false,
     "tileset.lastUsedFilter": "Tiled tileset files (*.tsx *.xml)",
     "tileset.lastUsedFormat": "tsx",
     "tileset.margin": 0,
     "tileset.spacing": 0,
     "tileset.tileSize": {
-        "height": 32,
-        "width": 32
+        "height": 64,
+        "width": 80
     }
 }
