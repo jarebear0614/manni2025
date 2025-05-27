@@ -21,11 +21,11 @@
             "scaleInEditor": 5.5
         },
         "C:/Users/Jared Germano/OneDrive/Pictures/MeganProjects/manni2025/public/assets/forest/forest.tmx": {
-            "scale": 2,
-            "selectedLayer": 1,
+            "scale": 1.5,
+            "selectedLayer": 2,
             "viewCenter": {
-                "x": 632.25,
-                "y": 539
+                "x": 3605.6666666666665,
+                "y": 574
             }
         },
         "C:/Users/Jared Germano/OneDrive/Pictures/MeganProjects/manni2025/public/assets/forest/forest.tmx#bulbs": {
@@ -81,9 +81,9 @@
     "project": "anni2025.tiled-project",
     "property.type": "float",
     "recentFiles": [
-        "C:/Users/Jared Germano/OneDrive/Pictures/MeganProjects/manni2025/public/assets/forest/character.tsx",
         "C:/Users/Jared Germano/OneDrive/Pictures/MeganProjects/manni2025/public/assets/forest/forest.tsx",
         "C:/Users/Jared Germano/OneDrive/Pictures/MeganProjects/manni2025/public/assets/forest/forest.tmx",
+        "C:/Users/Jared Germano/OneDrive/Pictures/MeganProjects/manni2025/public/assets/forest/character.tsx",
         "test.tmx",
         "base.tsx",
         "C:/Users/Jared Germano/OneDrive/Pictures/MeganProjects/manni2025/public/assets/forest/base.tsx",

@@ -244,6 +244,8 @@ export class Game extends BaseScene
         {
             this.isTouchRightDown = false;
         });
+
+        this.scale.setParentSize(window.innerWidth, window.innerHeight);
     }
 
     private configureBackgrounds()
@@ -523,7 +525,7 @@ export class Game extends BaseScene
 
     update(_: number)
     {
-        this.cameras.main.setBounds(0, 0, this.xLimit, this.yLimit);
+        this.cameras.main.setBounds(0, 0, this.xLimit, this.getGameHeight());
 
         this.isPreviousUpDown = this.isUpDown;
         this.isPreviousLeftDown = this.isLeftDown;
