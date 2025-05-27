@@ -100,7 +100,7 @@ export class Game extends BaseScene
     processedBulbSector: boolean = false;
     bulbSectors: boolean[] = [];
     
-    playerVelocity: number = 256;
+    playerVelocity: number = 128;
 
     isTouchUpDown: boolean = false;
     isTouchLeftDown: boolean = false;
@@ -226,14 +226,14 @@ export class Game extends BaseScene
         this.configureBulbObjects();  
         this.configurePoemLines();   
         
-        this.currentText = this.add.text(0, 0, 'test', {fontFamily: 'Arial', fontSize: 48, color: '#ffffff'})
+        this.currentText = this.add.text(0, 0, 'test', {fontFamily: 'Arial', fontSize: 24, color: '#ffffff'})
             .setStroke("#000000", 4)
             .setScrollFactor(0)
             .setAlpha(0.0);
 
-        this.rightButton = this.add.image(this.getGameWidth() * 0.15, this.getGameHeight() * 0.94, 'rightcontrol').setInteractive({useHandCursor: true}).setScrollFactor(0);
+        this.rightButton = this.add.image(this.getGameWidth() * 0.15, this.getGameHeight() * 0.88, 'rightcontrol').setInteractive({useHandCursor: true}).setScrollFactor(0);
 
-        Align.scaleToGameWidth(this.rightButton, 0.06, this);
+        Align.scaleToGameWidth(this.rightButton, 0.12, this);
 
         this.rightButton.on('pointerdown', () => 
         {
@@ -250,7 +250,7 @@ export class Game extends BaseScene
 
     private configureBackgrounds()
     {
-        this.bg1 = this.add.tileSprite(0, -191, 0, 0, 'bg1').setOrigin(0, 0).setScrollFactor(0, 0);
+        this.bg1 = this.add.tileSprite(0, -100, 0, 0, 'bg1').setOrigin(0, 0).setScrollFactor(0, 0);
         this.bg2 = this.add.tileSprite(0, 0, 0, 0, 'bg2').setOrigin(0, 0).setScrollFactor(0, 0);
         this.bg3 = this.add.tileSprite(0, 0, 0, 0, 'bg3').setOrigin(0, 0).setScrollFactor(0, 0);
         this.bg4 = this.add.tileSprite(0, 0, 0, 0, 'bg4').setOrigin(0, 0).setScrollFactor(0, 0);
@@ -261,7 +261,7 @@ export class Game extends BaseScene
         this.bg4.setScale(this.getGameWidth() / this.bg4.displayWidth, this.getGameHeight() / this.bg4.displayHeight);
         this.bg5.setScale(this.getGameWidth() / this.bg5.displayWidth, this.getGameHeight() / this.bg5.displayHeight);
 
-        this.bg1nightfall = this.add.tileSprite(0, -191, 0, 0, 'bg1nightfall').setOrigin(0, 0).setScrollFactor(0, 0).setAlpha(0);
+        this.bg1nightfall = this.add.tileSprite(0, -100, 0, 0, 'bg1nightfall').setOrigin(0, 0).setScrollFactor(0, 0).setAlpha(0);
         this.bg2nightfall = this.add.tileSprite(0, 0, 0, 0, 'bg2nightfall').setOrigin(0, 0).setScrollFactor(0, 0).setAlpha(0);
         this.bg3nightfall = this.add.tileSprite(0, 0, 0, 0, 'bg3nightfall').setOrigin(0, 0).setScrollFactor(0, 0).setAlpha(0);
         this.bg4nightfall = this.add.tileSprite(0, 0, 0, 0, 'bg4nightfall').setOrigin(0, 0).setScrollFactor(0, 0).setAlpha(0);
@@ -291,6 +291,7 @@ export class Game extends BaseScene
 
         let groundLayer = this.map.createLayer('ground', this.tileset, 0, 0)!.setOrigin(0, 0);
         groundLayer?.setScale(this.tilemapScale, this.tilemapScale);      
+        groundLayer.setCullPadding(10, 10);
 
         this.tilemapOffset = this.getGameHeight() - groundLayer.displayHeight;
         groundLayer.setPosition(0, this.tilemapOffset);
@@ -298,6 +299,7 @@ export class Game extends BaseScene
         let decorationLayer = this.map.createLayer('decoration', this.bulbTileset, 0, 0)!.setOrigin(0, 0);
         decorationLayer.setScale(this.tilemapScale, this.tilemapScale);
         decorationLayer.setPosition(0, this.tilemapOffset);
+        decorationLayer.setCullPadding(10, 10);
         
         this.player = this.physics.add.sprite(100, 0, 'player_base', 0).setOrigin(0, 0);
         this.player.body.setSize(32, 64, true);
@@ -312,10 +314,10 @@ export class Game extends BaseScene
         this.skirt = this.add.sprite(0, 0, 'player_skirt', 0).setOrigin(0, 0);
         this.skirt.setFlipX(true);
 
-        Align.scaleToGameWidth(this.player, 0.08, this);
-        Align.scaleToGameWidth(this.corset, 0.08, this);
-        Align.scaleToGameWidth(this.hair, 0.08, this);
-        Align.scaleToGameWidth(this.skirt, 0.08, this);
+        Align.scaleToGameWidth(this.player, 0.16, this);
+        Align.scaleToGameWidth(this.corset, 0.16, this);
+        Align.scaleToGameWidth(this.hair, 0.16, this);
+        Align.scaleToGameWidth(this.skirt, 0.16, this);
 
         this.anims.create({
             key: 'base_walk',
